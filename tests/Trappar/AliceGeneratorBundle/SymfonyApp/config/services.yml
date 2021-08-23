@@ -1,3 +1,6 @@
 services:
+    _defaults:
+        public: true
+
     Trappar\AliceGeneratorBundle\Tests\SymfonyApp\TestBundle\ObjectHandler\CustomHandler:
         tags: [ { name: trappar_alice_generator.object_handler } ]

@@ -1,4 +1,7 @@
 services:
+    _defaults:
+        public: true
+
     # Metadata Drivers
     trappar_alice_generator.metadata.file_locator:
         public: false
