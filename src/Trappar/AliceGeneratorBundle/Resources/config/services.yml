@@ -4,25 +4,25 @@ services:
 
     # Metadata Drivers
     trappar_alice_generator.metadata.file_locator:
-        public: false
+        public: true
         class: Metadata\Driver\FileLocator
 
     Trappar\AliceGenerator\Metadata\Driver\YamlDriver:
-        public: false
+        public: true
         arguments: ['@trappar_alice_generator.metadata.file_locator']
 
     Trappar\AliceGenerator\Metadata\Driver\AnnotationDriver:
-        public: false
+        public: true
         arguments: ['@annotation_reader']
 
     trappar_alice_generator.metadata.chain_driver:
-        public: false
+        public: true
         class: Metadata\Driver\DriverChain
         arguments:
             - ['@Trappar\AliceGenerator\Metadata\Driver\YamlDriver', '@Trappar\AliceGenerator\Metadata\Driver\AnnotationDriver']
 
     trappar_alice_generator.metadata.lazy_loading_driver:
-        public: false
+        public: true
         class: Metadata\Driver\LazyLoadingDriver
         arguments:
             - '@service_container'
@@ -30,30 +30,30 @@ services:
 
     # Metadata Factory
     trappar_alice_generator.metadata.factory:
-        public: false
+        public: true
         class: Metadata\MetadataFactory
         arguments: ['@trappar_alice_generator.metadata.lazy_loading_driver']
 
     # Metadata Resolvers Faker
     Trappar\AliceGenerator\Metadata\Resolver\Faker\ArrayFakerResolver:
-        public: false
+        public: true
 
     Trappar\AliceGenerator\Metadata\Resolver\Faker\CallbackFakerResolver:
-        public: false
+        public: true
 
     Trappar\AliceGenerator\Metadata\Resolver\Faker\NoArgFakerResolver:
-        public: false
+        public: true
 
     Trappar\AliceGenerator\Metadata\Resolver\Faker\ValueAsArgFakerResolver:
-        public: false
+        public: true
 
     Trappar\AliceGeneratorBundle\Metadata\Resolver\Faker\ServiceFakerResolver:
-        public: false
+        public: true
         arguments: ['@service_container']
 
     # Metadata Resolvers
     Trappar\AliceGenerator\Metadata\Resolver\MetadataResolver:
-        public: false
+        public: true
         arguments:
             -
                 - '@Trappar\AliceGenerator\Metadata\Resolver\Faker\ArrayFakerResolver'
@@ -64,19 +64,19 @@ services:
 
     # Persisters
     Trappar\AliceGeneratorBundle\Persister\DoctrinePersister:
-        public: false
+        public: true
         arguments: ['@doctrine']
 
     # Object Handlers
     Trappar\AliceGenerator\ObjectHandler\CollectionHandler:
-        public: false
+        public: true
 
     Trappar\AliceGenerator\ObjectHandler\DateTimeHandler:
-        public: false
+        public: true
 
     # Object Handler Registries
     Trappar\AliceGenerator\ObjectHandlerRegistry:
-        public: false
+        public: true
         arguments:
             -
                 - '@Trappar\AliceGenerator\ObjectHandler\CollectionHandler'
@@ -84,16 +84,16 @@ services:
 
     # Yaml Writer
     Trappar\AliceGenerator\YamlWriter:
-        public: false
+        public: true
 
     # Property Namer
     Trappar\AliceGenerator\PropertyNamer\PropertyNamer:
-        public: false
+        public: true
     Trappar\AliceGenerator\PropertyNamer\PropertyNamerInterface: '@Trappar\AliceGenerator\PropertyNamer\PropertyNamer'
 
     # Fixture Generator
     Trappar\AliceGenerator\ValueVisitor:
-        public: false
+        public: true
         arguments:
             - '@trappar_alice_generator.metadata.factory'
             - '@Trappar\AliceGeneratorBundle\Persister\DoctrinePersister'
