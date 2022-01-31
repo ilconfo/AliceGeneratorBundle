@@ -2,17 +2,17 @@
 
 namespace Trappar\AliceGeneratorBundle\Persister;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Trappar\AliceGenerator\Persister\DoctrinePersister as BaseDoctrinePersister;
 
 class DoctrinePersister extends BaseDoctrinePersister
 {
     /**
-     * @var ManagerRegistry
+     * @var Registry
      */
     private $doctrine;
 
-    public function __construct(ManagerRegistry $doctrine)
+    public function __construct(Registry $doctrine)
     {
         parent::__construct($doctrine->getManager());
         $this->doctrine = $doctrine;
