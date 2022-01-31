@@ -2,6 +2,7 @@
 
 namespace Trappar\AliceGeneratorBundle\Command;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -17,12 +18,12 @@ use Trappar\AliceGenerator\FixtureGenerator;
 
 class GenerateFixturesCommand extends Command
 {
-    const DEFAULT_DEPTH = 5;
-    const DEFAULT_OUTPUT_PATH_SUFFIX = '/DataFixtures/ORM/generated.yml';
+    public const DEFAULT_DEPTH = 5;
+    public const DEFAULT_OUTPUT_PATH_SUFFIX = '/DataFixtures/ORM/generated.yml';
     public static $selectionTypes = [
         'all',
         'id',
-        'where'
+        'where',
     ];
 
     /**
@@ -56,16 +57,15 @@ class GenerateFixturesCommand extends Command
     private $questions;
 
     public function __construct(
-        ManagerRegistry $managerRegistry,
+        Registry $managerRegistry,
         KernelInterface $kernel,
         FixtureGenerator $fixtureGenerator,
         Filesystem $filesystem
-    )
-    {
-        $this->doctrine         = $managerRegistry;
-        $this->kernel           = $kernel;
+    ) {
+        $this->doctrine = $managerRegistry;
+        $this->kernel = $kernel;
         $this->fixtureGenerator = $fixtureGenerator;
-        $this->filesystem       = $filesystem;
+        $this->filesystem = $filesystem;
 
         parent::__construct();
     }
@@ -83,17 +83,17 @@ class GenerateFixturesCommand extends Command
 
     public function initialize(InputInterface $input, OutputInterface $output)
     {
-        $entities                = [];
-        $entityNamespaces        = [];
+        $entities = [];
+        $entityNamespaces = [];
         $bundleNamesWithEntities = [];
 
         foreach ($this->doctrine->getManagers() as $manager) {
             if ($manager instanceof EntityManager) {
-                $configuration           = $manager->getConfiguration();
-                $entities                = array_merge($entities,
+                $configuration = $manager->getConfiguration();
+                $entities = array_merge($entities,
                     $configuration->getMetadataDriverImpl()->getAllClassNames()
                 );
-                $entityNamespaces        = array_merge($entityNamespaces,
+                $entityNamespaces = array_merge($entityNamespaces,
                     $configuration->getEntityNamespaces()
                 );
                 $bundleNamesWithEntities = array_merge($bundleNamesWithEntities,
@@ -102,7 +102,7 @@ class GenerateFixturesCommand extends Command
             }
         }
 
-        $this->entityAutocomplete      = array_merge(
+        $this->entityAutocomplete = array_merge(
             array_keys($entityNamespaces),
             array_filter(array_map(function ($entity) use ($entityNamespaces) {
                 foreach ($entityNamespaces as $alias => $entityNamespace) {
@@ -141,7 +141,7 @@ class GenerateFixturesCommand extends Command
         }
 
         if ($configuredInteractively && $this->isDepthDefault($input)) {
-            $output->writeln(array('', 'How deep should the fixture generator recurse through entities\' relations?'));
+            $output->writeln(['', 'How deep should the fixture generator recurse through entities\' relations?']);
 
             $depth = $this->questions->askForRecursionDepth();
             $input->setOption('depth', $depth);
@@ -149,12 +149,12 @@ class GenerateFixturesCommand extends Command
 
         if ($configuredInteractively && $this->isOutputPathDefault($input)) {
             while (true) {
-                $output->writeln(array('', 'Where should the generated YAML file be written?'));
+                $output->writeln(['', 'Where should the generated YAML file be written?']);
 
                 $outputPath = $this->questions->askForOutputDirectory($this->bundleNamesWithEntities, $this->getDefaultOutputPath());
 
                 if ($this->filesystem->exists($this->locate($outputPath))) {
-                    $output->writeln(array('', 'File already exists, overwrite?'));
+                    $output->writeln(['', 'File already exists, overwrite?']);
 
                     if (!$this->questions->askIfFileOverwrite()) {
                         continue;
@@ -173,7 +173,7 @@ class GenerateFixturesCommand extends Command
             );
 
             $includedOptions = [
-                '--entities="' . $input->getOption('entities') . '"'
+                '--entities="' . $input->getOption('entities') . '"',
             ];
             if (!$this->isDepthDefault($input)) {
                 $includedOptions[] = '-d' . $input->getOption('depth');
@@ -196,7 +196,7 @@ class GenerateFixturesCommand extends Command
         while (true) {
             $output->writeln(['', '',
                 'Enter an entity which will be used to generate fixtures or keep blank to exit entity selection.',
-                'You must use the shortcut notation like <comment>AcmeBlogBundle:Post</comment>.'
+                'You must use the shortcut notation like <comment>AcmeBlogBundle:Post</comment>.',
             ]);
 
             /** @var ClassMetadata $entityMetadata */
@@ -221,7 +221,7 @@ class GenerateFixturesCommand extends Command
 
             $output->writeln(['',
                 'Which records will be used for generating entities?',
-                '<info>Available selection types:</info> ' . $selectionTypesFormatted
+                '<info>Available selection types:</info> ' . $selectionTypesFormatted,
             ]);
 
             $selectionType = $this->questions->askForSelectionType(self::$selectionTypes);
@@ -233,10 +233,10 @@ class GenerateFixturesCommand extends Command
                     break;
                 case 'id':
                     $output->writeln(['',
-                        'Enter a comma separated list of all IDs to include in fixtures for <comment>' . $entityAlias . '</comment>'
+                        'Enter a comma separated list of all IDs to include in fixtures for <comment>' . $entityAlias . '</comment>',
                     ]);
 
-                    $ids       = $this->questions->askForIDs();
+                    $ids = $this->questions->askForIDs();
                     $selection = [$selectionType, $ids];
                     break;
                 case 'where':
@@ -251,7 +251,7 @@ class GenerateFixturesCommand extends Command
                         '<info>Example:</info> <comment>username:test</comment>, <comment>email:test@email.com</comment>',
                     ]);
 
-                    $where     = $this->questions->askForWhereConditions($entityMetadata);
+                    $where = $this->questions->askForWhereConditions($entityMetadata);
                     $selection = [$selectionType, $where];
                     break;
             }
@@ -259,7 +259,7 @@ class GenerateFixturesCommand extends Command
             $entityConfig[] = $selection;
 
             $output->writeln(['',
-                'Would you like to add entities selected in this way as object constraints? <info>(see AliceGenerator usage documentation)</info>'
+                'Would you like to add entities selected in this way as object constraints? <info>(see AliceGenerator usage documentation)</info>',
             ]);
 
             if ($this->questions->askIfAddAsEntityConstraints()) {
@@ -279,9 +279,8 @@ class GenerateFixturesCommand extends Command
 
     /**
      * @see Command
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int|null|void
+     *
+     * @return int|void|null
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -290,7 +289,7 @@ class GenerateFixturesCommand extends Command
         $entitiesConfig = Yaml::parse('[' . $input->getOption('entities') . ']');
 
         $entities = [];
-        $errors   = [];
+        $errors = [];
 
         $fixtureGenerationContext = FixtureGenerationContext::create();
         $fixtureGenerationContext->setMaximumRecursion($input->getOption('depth'));
@@ -349,7 +348,7 @@ class GenerateFixturesCommand extends Command
             }
 
             if (!$selectionProcessed) {
-                $errors[] = $this->getEntitySelectionError("Unknown selection type or format", $entityConfig);
+                $errors[] = $this->getEntitySelectionError('Unknown selection type or format', $entityConfig);
             }
 
             if ($addToEntityConstraints) {
@@ -368,7 +367,7 @@ class GenerateFixturesCommand extends Command
             sprintf(
                 'Writing generated fixtures to <info>"%s"</info>',
                 $outputFile
-            )
+            ),
         ]);
 
         $this->writeFile($outputFile, $yaml);
@@ -399,9 +398,10 @@ class GenerateFixturesCommand extends Command
 
     /**
      * The implementation of this in FileLocator doesn't allow for files which don't exist, so this is a simple
-     * reimplementation of that
+     * reimplementation of that.
      *
      * @param $file
+     *
      * @return string
      */
     private function locate($file)
@@ -412,13 +412,13 @@ class GenerateFixturesCommand extends Command
             }
 
             $bundleName = substr($file, 1);
-            $path       = '';
+            $path = '';
             if (false !== strpos($bundleName, '/')) {
                 list($bundleName, $path) = explode('/', $bundleName, 2);
             }
 
             $bundle = $this->kernel->getBundle($bundleName);
-            $file   = $bundle->getPath() . '/' . $path;
+            $file = $bundle->getPath() . '/' . $path;
         }
 
         return $file;
@@ -438,7 +438,7 @@ class GenerateFixturesCommand extends Command
     {
         $defaultOutputPath = false;
         if (count($this->bundleNamesWithEntities) > 0) {
-            $suggestedBundle   = $this->bundleNamesWithEntities[0];
+            $suggestedBundle = $this->bundleNamesWithEntities[0];
             $defaultOutputPath = '@' . $suggestedBundle . self::DEFAULT_OUTPUT_PATH_SUFFIX;
         }
 
@@ -447,11 +447,11 @@ class GenerateFixturesCommand extends Command
 
     private function writeSection(OutputInterface $output, $text, $style = 'bg=blue;fg=white')
     {
-        $output->writeln(array(
+        $output->writeln([
             '',
             $this->getHelper('formatter')->formatBlock($text, $style, true),
             '',
-        ));
+        ]);
     }
 
     private function getEntitySelectionError($message, $entityConfig, $displaySkipped = true)
