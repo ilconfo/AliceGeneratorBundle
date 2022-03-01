@@ -2,7 +2,7 @@
 
 namespace Trappar\AliceGeneratorBundle\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Yaml\Yaml;
 
@@ -14,6 +14,7 @@ class Validators
      *
      * @param       $methodName
      * @param mixed ...$boundArgs
+     *
      * @return \Closure
      */
     public static function createBoundValidator($methodName, ...$boundArgs)
@@ -23,7 +24,7 @@ class Validators
         };
     }
 
-    public static function validateEntity(ManagerRegistry $doctrine, $entityAlias)
+    public static function validateEntity(Registry $doctrine, $entityAlias)
     {
         $metadata = null;
 
@@ -31,10 +32,7 @@ class Validators
             try {
                 $metadata = $doctrine->getManagerForClass($entityAlias)->getClassMetadata($entityAlias);
             } catch (\Exception $e) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Unable to fetch entity information for "%s"',
-                    $entityAlias
-                ));
+                throw new \InvalidArgumentException(sprintf('Unable to fetch entity information for "%s"', $entityAlias));
             }
         }
 
@@ -91,10 +89,7 @@ class Validators
 
         foreach ($parsed as $field => $value) {
             if (!in_array($field, $knownFields)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Unknown field "%s".',
-                    $field
-                ));
+                throw new \InvalidArgumentException(sprintf('Unknown field "%s".', $field));
             }
         }
 

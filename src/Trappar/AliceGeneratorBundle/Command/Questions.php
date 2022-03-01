@@ -2,7 +2,7 @@
 
 namespace Trappar\AliceGeneratorBundle\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,8 +26,8 @@ class Questions
 
     public function __construct(InputInterface $input, OutputInterface $output, HelperSet $helperSet)
     {
-        $this->input     = $input;
-        $this->output    = $output;
+        $this->input = $input;
+        $this->output = $output;
         $this->helperSet = $helperSet;
     }
 
@@ -59,7 +59,7 @@ class Questions
         return $this->ask($question);
     }
 
-    public function askForEntity(ManagerRegistry $doctrine, $entityAutocomplete)
+    public function askForEntity(Registry $doctrine, $entityAutocomplete)
     {
         $question = $this->getQuestion('Entity shortcut name', false);
         $question->setAutocompleterValues($entityAutocomplete);

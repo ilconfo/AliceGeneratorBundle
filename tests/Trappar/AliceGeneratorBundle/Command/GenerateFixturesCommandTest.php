@@ -2,7 +2,7 @@
 
 namespace Trappar\AliceGeneratorBundle\Tests\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -21,7 +21,7 @@ class GenerateFixturesCommandTest extends KernelTestCase
      */
     private $application;
     /**
-     * @var ManagerRegistry
+     * @var Registry
      */
     private $doctrine;
 
@@ -36,7 +36,6 @@ class GenerateFixturesCommandTest extends KernelTestCase
 
     /**
      * @dataProvider getInteractiveCommandData
-     * @param Options $options
      */
     public function testCommand(Options $options)
     {
@@ -50,7 +49,7 @@ class GenerateFixturesCommandTest extends KernelTestCase
             $options->entities = $this->getTestEntities();
         }
         if ($options->input) {
-            for ($i=0; $i<20; $i++) {
+            for ($i = 0; $i < 20; ++$i) {
                 $options->input[] = '';
             }
         }
@@ -83,96 +82,95 @@ class GenerateFixturesCommandTest extends KernelTestCase
 
         /** VALIDATION SPECIFIC TESTS **/
         // Invalid selection type
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'asdf'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'asdf'];
         $options->displayRegex = '~invalid selection type~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Invalid ID/integer
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'id', 'abc'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'id', 'abc'];
         $options->displayRegex = '~invalid non-int given~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // ID list with extra comma
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'id', '1,,,2'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'id', '1,,,2'];
         $options->displayRegex = '~id, \[1, 2\]~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Invalid where conditions
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'where', 'test', 'username: test'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'where', 'test', 'username: test'];
         $options->displayRegex = '~malformed inline yaml string~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Where condition returned empty
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'where', '', 'username: test'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'where', '', 'username: test'];
         $options->displayRegex = '~at least one condition~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Where condition with non-existent field
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', 'where', 'test: test', 'username: test'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', 'where', 'test: test', 'username: test'];
         $options->displayRegex = '~unknown field~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Attempt yes/no with garbage
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', '', 'asdf'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', '', 'asdf'];
         $options->displayRegex = '~"yes" or "no"~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Output path with wrong extension
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', '', '', '', '', 'test.exe'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', '', '', '', '', 'test.exe'];
         $options->displayRegex = '~must have .yml extension~i';
-        $data[]                = [$options];
-
+        $data[] = [$options];
 
         /** TESTS WITH NO ERRORS **/
         // Selecting two posts by IDs
         $fg = $this->createMockGenerator();
         $fg->method('generateYaml')->with($this->logicalNot($this->arrayHasKey(2)));
-        $options            = new Options();
+        $options = new Options();
         $options->generator = $fg;
-        $options->input     = ['TestBundle:Post', 'id', '1,2'];
-        $data[]             = [$options];
+        $options->input = ['TestBundle:Post', 'id', '1,2'];
+        $data[] = [$options];
 
         // Selecting a post by where
         $fg = $this->createMockGenerator();
         $fg->method('generateYaml')->with($this->logicalNot($this->arrayHasKey(1)));
-        $options            = new Options();
+        $options = new Options();
         $options->generator = $fg;
-        $options->input     = ['TestBundle:Post', 'where', 'title: My Title'];
-        $data[]             = [$options];
+        $options->input = ['TestBundle:Post', 'where', 'title: My Title'];
+        $data[] = [$options];
 
         // Overwrite existing file
-        $options               = new Options();
-        $options->filesystem   = $this->createMockFilesystem(true);
-        $options->input        = ['TestBundle:User', '', '', '', '', '', 'no'];
+        $options = new Options();
+        $options->filesystem = $this->createMockFilesystem(true);
+        $options->input = ['TestBundle:User', '', '', '', '', '', 'no'];
         $options->displayRegex = '~file already exists~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Ensure that "text time" command displays custom output options
-        $options               = new Options();
-        $options->options      = ['-d' => 1, '-o' => 'test.yml'];
-        $options->input        = ['TestBundle:User'];
+        $options = new Options();
+        $options->options = ['-d' => 1, '-o' => 'test.yml'];
+        $options->input = ['TestBundle:User'];
         $options->displayRegex = '~-d.*-o~';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Depth and output location are at default so the "next time" command should not display those options
-        $options                 = new Options();
-        $options->input          = ['TestBundle:User'];
+        $options = new Options();
+        $options->input = ['TestBundle:User'];
         $options->noDisplayRegex = '~-d|-o~';
-        $data[]                  = [$options];
+        $data[] = [$options];
 
         // Ensure duplicate configuration doesn't result in duplicate selection
-        $options               = new Options();
-        $options->input        = ['TestBundle:User', '', '', 'TestBundle:User'];
+        $options = new Options();
+        $options->input = ['TestBundle:User', '', '', 'TestBundle:User'];
         $options->displayRegex = '~--entities="\[\'TestBundle:User\', all\]"~';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Ensure that FixtureGenerationContext is being generated correctly
         $entities = $this->getTestEntities();
@@ -186,95 +184,94 @@ class GenerateFixturesCommandTest extends KernelTestCase
                     && $context->getMaximumRecursion() === 100;
                 }
             ));
-        $options            = new Options();
+        $options = new Options();
         $options->generator = $fg;
-        $options->input     = ['TestBundle:Post', 'id', '', 'yes'];
-        $options->entities  = $entities;
-        $options->options   = ['-d' => 100];
-        $data[]             = [$options];
-
+        $options->input = ['TestBundle:Post', 'id', '', 'yes'];
+        $options->entities = $entities;
+        $options->options = ['-d' => 100];
+        $data[] = [$options];
 
         /** TESTS WITH ERROR OUTPUT **/
         // Attempt not to select anything
-        $options               = new Options();
-        $options->input        = ['', 'TestBundle:User'];
+        $options = new Options();
+        $options->input = ['', 'TestBundle:User'];
         $options->displayRegex = '~no entities are selected for fixture generation~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Attempt invalid where conditions
-        $options               = new Options();
-        $options->options      = ['--entities' => "['TestBundle:User', [where, { nonexistent: test }]]"];
+        $options = new Options();
+        $options->options = ['--entities' => "['TestBundle:User', [where, { nonexistent: test }]]"];
         $options->displayRegex = '~unrecognized field: nonexistent~i';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Attempt to select records by invalid ID
-        $options               = new Options();
-        $options->options      = ['--entities' => "['TestBundle:User', [id, [null]]]"];
+        $options = new Options();
+        $options->options = ['--entities' => "['TestBundle:User', [id, [null]]]"];
         $options->displayRegex = '~The identifier id is missing~';
-        $data[]                = [$options];
+        $data[] = [$options];
 
         // Selecting a non-existent post by ID
         $fg = $this->createMockGenerator();
         $fg->method('generateYaml')->with($this->logicalNot($this->arrayHasKey(0)));
-        $options               = new Options();
-        $options->generator    = $fg;
+        $options = new Options();
+        $options->generator = $fg;
         $options->displayRegex = '~no result returned~i';
-        $options->input        = ['TestBundle:Post', 'id', '3'];
-        $data[]                = [$options];
+        $options->input = ['TestBundle:Post', 'id', '3'];
+        $data[] = [$options];
 
         // Attempt to save to an invalid location
-        $options                 = new Options();
-        $options->exception      = \RuntimeException::class;
+        $options = new Options();
+        $options->exception = \RuntimeException::class;
         $options->exceptionRegex = '~invalid characters~';
-        $options->options        = [
+        $options->options = [
             '--entities' => '"[\'TestBundle:User\', all]"',
-            '-o'         => '@../blah.yml'
+            '-o' => '@../blah.yml',
         ];
-        $data[]                  = [$options];
+        $data[] = [$options];
 
         // Attempt to select non-existent entity
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~Unable to locate repository~';
-        $options->options      = ['--entities' => "['TestBundle:BadEntity', all]"];
-        $data[]                = [$options];
+        $options->options = ['--entities' => "['TestBundle:BadEntity', all]"];
+        $data[] = [$options];
 
         // Attempt to select all records for entity with no records
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~no results returned~i';
-        $options->options      = ['--entities' => "['TestBundle:User', all]"];
-        $options->entities     = [];
-        $data[]                = [$options];
+        $options->options = ['--entities' => "['TestBundle:User', all]"];
+        $options->entities = [];
+        $data[] = [$options];
 
         // Attempt to select entities with selection type is missing
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~not formatted correctly~i';
-        //
+
         $options->options = ['--entities' => "['TestBundle:User']"];
-        $data[]           = [$options];
+        $data[] = [$options];
 
         // Attempt to select entities with malformed yaml - should be an array
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~not formatted correctly~i';
-        $options->options      = ['--entities' => "'TestBundle:User', all"];
-        $data[]                = [$options];
+        $options->options = ['--entities' => "'TestBundle:User', all"];
+        $data[] = [$options];
 
         // Invalid entity name
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~Unable to fetch entity information for "badEntity"~';
-        $options->input        = ['badEntity', 'TestBundle:Post'];
-        $data[]                = [$options];
+        $options->input = ['badEntity', 'TestBundle:Post'];
+        $data[] = [$options];
 
         // Invalid selection type
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~unknown selection type~i';
-        $options->options      = ['--entities' => "['TestBundle:User', asdf]"];
-        $data[]                = [$options];
+        $options->options = ['--entities' => "['TestBundle:User', asdf]"];
+        $data[] = [$options];
 
         // Invalid selection type
-        $options               = new Options();
+        $options = new Options();
         $options->displayRegex = '~unknown selection type~i';
-        $options->options      = ['--entities' => "['TestBundle:User', [sadf]]"];
-        $data[]                = [$options];
+        $options->options = ['--entities' => "['TestBundle:User', [sadf]]"];
+        $data[] = [$options];
 
         return $data;
     }
@@ -296,7 +293,7 @@ class GenerateFixturesCommandTest extends KernelTestCase
             fwrite($stream, implode("\n", $options->input));
             rewind($stream);
 
-            $helper  = $command->getHelper('question');
+            $helper = $command->getHelper('question');
             $helper->setInputStream($stream);
         }
 
@@ -334,18 +331,18 @@ class GenerateFixturesCommandTest extends KernelTestCase
 
     private function getTestEntities()
     {
-        $post        = new Post();
-        $post->body  = 'Test this';
+        $post = new Post();
+        $post->body = 'Test this';
         $post->title = 'My Title';
 
-        $post2        = new Post();
+        $post2 = new Post();
         $post2->title = 'blah';
-        $post2->body  = 'test';
+        $post2->body = 'test';
 
-        $user           = new User();
+        $user = new User();
         $user->username = 'test';
 
-        $post->postedBy  = $user;
+        $post->postedBy = $user;
         $post2->postedBy = $user;
 
         return [$post, $post2, $user];
@@ -368,7 +365,6 @@ class GenerateFixturesCommandTest extends KernelTestCase
      * Helper to run a Symfony command.
      *
      * @param string $command
-     * @param array  $options
      *
      * @return int
      *
@@ -378,11 +374,10 @@ class GenerateFixturesCommandTest extends KernelTestCase
     {
         $options['-e'] = 'test';
         $options['-q'] = null;
-        $options       = array_merge($options, ['command' => $command]);
+        $options = array_merge($options, ['command' => $command]);
 
         return $this->application->run(new ArrayInput($options));
     }
-
 }
 
 class Options

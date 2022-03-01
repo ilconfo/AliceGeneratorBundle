@@ -3,7 +3,6 @@
 namespace Trappar\AliceGeneratorBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Console\Command\Command;
@@ -27,7 +26,7 @@ class GenerateFixturesCommand extends Command
     ];
 
     /**
-     * @var ManagerRegistry
+     * @var Registry
      */
     private $doctrine;
     /**
